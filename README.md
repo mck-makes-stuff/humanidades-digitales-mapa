@@ -6,9 +6,13 @@ Un mapa interactivo que muestra dónde se publican las fuentes de una bibliograf
 
 ## Cómo funciona
 
-- `fuentes.csv` es la bibliografía exportada de Zotero (Archivo → Exportar biblioteca → CSV).
-- `ubicaciones.json` asigna cada fuente (por su clave de Zotero, la columna `Key`) a una ciudad y explica por qué. También permite corregir datos incompletos del CSV (autores, título, publicación, enlace).
-- `app.js` lee los dos archivos, une las fuentes repetidas y dibuja el mapa con D3.
+- `fuentes.csv` es la bibliografía exportada de Zotero.
+- `ubicaciones.json` dice dónde va cada fuente. Tiene cuatro partes:
+  - `lugares`: las ciudades del mapa, con sus coordenadas.
+  - `revistas`: en qué ciudad se publica cada revista. Cualquier artículo de una revista de esta lista se ubica solo.
+  - `editoriales`: lo mismo para las editoriales de libros.
+  - `fuentes`: casos particulares, por clave de Zotero o por DOI (por ejemplo, cuando se ubica por el autor o hay que corregir un dato).
+- `app.js` lee los dos archivos, une las fuentes repetidas y dibuja el globo con D3. Respeta las cursivas y otros formatos que Zotero guarda en los títulos (`<i>`, `<b>`, `<sub>`, `<sup>`).
 
 ## Cómo se ubicó cada fuente
 
@@ -16,7 +20,8 @@ Un mapa interactivo que muestra dónde se publican las fuentes de una bibliograf
 2. Si ese dato no existe, en el lugar de origen del autor.
 3. Si no se puede determinar ninguno de los dos, la fuente no aparece en el mapa.
 
-## Añadir fuentes
+## Actualizar las fuentes
 
-1. Exporta de nuevo la biblioteca de Zotero como CSV y reemplaza `fuentes.csv`.
-2. Añade en `ubicaciones.json` una entrada para cada fuente nueva, con su clave, el lugar, el criterio (`editorial` o `autor`) y una explicación breve.
+1. En Zotero, selecciona las fuentes y expórtalas en formato CSV.
+2. Ejecuta `python3 actualizar.py` en esta carpeta. El script busca el CSV de Zotero más reciente en Descargas, el Escritorio o la carpeta superior (o usa la ruta que le pases), lo copia a `fuentes.csv` sin rutas locales ni notas, y publica el cambio.
+3. Si el script avisa de fuentes sin ubicar, añade su revista o editorial a `ubicaciones.json` y vuelve a ejecutarlo.

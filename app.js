@@ -4,7 +4,7 @@ const ATLAS = 'https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json
 const TIPOS = { book: 'Libro', journalArticle: 'Artículo', bookSection: 'Capítulo de libro', webpage: 'Página web', thesis: 'Tesis' };
 const CRITERIOS = { editorial: 'Ubicada según quién la publicó.', autor: 'Ubicada según el origen del autor.' };
 
-const estado = { lugares: [], fuentes: [], elegido: null, vista: 'inicio', centro: [-50, 16], k: 1 };
+const estado = { lugares: [], fuentes: [], elegido: null, vista: 'inicio', centro: [-42, 16], k: 1 };
 let lienzo, ctx, svg, proyeccion, trazo, ancho, alto, radio, cx, cy, tierra, fronteras, activos, animacion, vaiven, C;
 
 const $ = (sel) => document.querySelector(sel);
@@ -46,7 +46,7 @@ function leerCSV(texto) {
   return filas.map((f) => Object.fromEntries(cabecera.map((nombre, i) => [nombre, (f[i] || '').trim()])));
 }
 
-const normalizar = (s) => s.toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g, '');
+const normalizar = (s) => (s || '').replace(/<[^>]+>/g, '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]/g, '');
 const limpiar = (s) => s.replace(/\s*\?`\s*/g, ' ¿').replace(/\s+/g, ' ').trim();
 
 // Une las filas repetidas (mismo título) y descarta las que no tienen ubicación.
@@ -60,12 +60,19 @@ function prepararFuentes(filas, ubicaciones) {
     for (const [k, v] of Object.entries(fila)) if (!previa[k] && v) previa[k] = v;
   }
 
+  // Cada fuente se ubica por su propia entrada (clave de Zotero o DOI); si no tiene,
+  // por su revista y, en último caso, por su editorial.
+  const indice = (mapa) => new Map(Object.entries(mapa || {}).map(([k, v]) => [normalizar(k), v]));
+  const revistas = indice(ubicaciones.revistas);
+  const editoriales = indice(ubicaciones.editoriales);
+
   const fuentes = [];
   let excluidas = 0;
   for (const f of unicas.values()) {
-    const clave = f.claves.find((k) => ubicaciones.fuentes[k]);
-    const u = clave && ubicaciones.fuentes[clave];
-    if (!u || !ubicaciones.lugares[u.lugar]) { excluidas++; continue; }
+    const propia = [...f.claves, f['DOI'].toLowerCase()].map((k) => k && ubicaciones.fuentes[k]).find(Boolean) || {};
+    const general = revistas.get(normalizar(propia.publicacion || f['Publication Title'])) || editoriales.get(normalizar(f['Publisher'])) || {};
+    const u = { criterio: 'editorial', ...general, ...propia };
+    if (!ubicaciones.lugares[u.lugar]) { excluidas++; continue; }
     fuentes.push({
       lugar: u.lugar,
       criterio: u.criterio,
@@ -78,11 +85,30 @@ function prepararFuentes(filas, ubicaciones) {
       anio: u.anio || f['Publication Year'],
       volumen: f['Volume'],
       numero: f['Issue'],
-      paginas: f['Pages'].replace(/-/g, '–'),
+      paginas: f['Pages'].replace(/\s*[-–]\s*/g, '–'),
       url: u.url || f['Url'] || (f['DOI'] && 'https://doi.org/' + f['DOI']) || f['Link Attachments'].split(';')[0].trim(),
     });
   }
   return { fuentes, excluidas };
+}
+
+// Zotero guarda las cursivas y otros formatos de los títulos como etiquetas (<i>, <b>, <sub>, <sup>,
+// versalitas). Aquí se convierten en elementos reales; cualquier otra etiqueta se muestra como texto.
+function rico(texto) {
+  const raiz = document.createDocumentFragment();
+  const pila = [raiz];
+  const marca = /<(i|b|em|strong|sub|sup)>|<span style="font-variant:\s*small-caps;?">|<span class="nocase">|<\/(i|b|em|strong|sub|sup|span)>/gi;
+  let desde = 0, m;
+  while ((m = marca.exec(texto))) {
+    pila[pila.length - 1].append(texto.slice(desde, m.index));
+    desde = marca.lastIndex;
+    if (m[0].startsWith('</')) { if (pila.length > 1) pila.pop(); continue; }
+    const nodo = m[1] ? el(m[1].toLowerCase()) : el('span', m[0].includes('small-caps') ? { class: 'versalitas' } : {});
+    pila[pila.length - 1].append(nodo);
+    pila.push(nodo);
+  }
+  pila[pila.length - 1].append(texto.slice(desde));
+  return raiz;
 }
 
 function nombresAutores(autores) {
@@ -99,16 +125,16 @@ function construirCita(f) {
   const autores = nombresAutores(f.autores);
   if (autores) p.append(punto(autores) + ' ');
   if (f.tipo === 'book') {
-    p.append(el('em', {}, f.titulo), '. ');
+    p.append(el('em', {}, rico(f.titulo)), '. ');
     p.append([f.editorial, f.anio].filter(Boolean).join(', ') + '.');
   } else {
-    p.append('«' + f.titulo + '». ');
+    p.append('«', rico(f.titulo), '». ');
     if (f.publicacion) p.append(el('em', {}, f.publicacion));
     const resto = [
       f.volumen && 'vol. ' + f.volumen,
       f.numero && 'n.º ' + f.numero,
       f.anio,
-      f.paginas.includes('–') && 'pp. ' + f.paginas,
+      f.paginas.includes('–') ? 'pp. ' + f.paginas : /^e\d+$/i.test(f.paginas) && f.paginas,
     ].filter(Boolean).join(', ');
     p.append((f.publicacion && resto ? ', ' : '') + resto + '.');
   }
@@ -120,8 +146,9 @@ const plural = (n) => (n === 1 ? '1 fuente' : n + ' fuentes');
 /* ---------- Globo ---------- */
 
 const VISTAS = {
-  inicio: { centro: [-50, 16], k: 1 },
+  inicio: { centro: [-42, 16], k: 1 },
   espana: (ls) => ls.filter((l) => l.pais === 'España'),
+  europa: (ls) => ls.filter((l) => l.lon > -12),
   america: (ls) => ls.filter((l) => l.lon < -30),
 };
 const K_MIN = 1, K_MAX = 10;
@@ -213,7 +240,7 @@ function medir() {
   lienzo.width = ancho * dpr; lienzo.height = alto * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   svg.attr('viewBox', `0 0 ${ancho} ${alto}`);
-  for (const l of estado.lugares) l.r = (anchoPantalla.matches ? 10 : 8) + (anchoPantalla.matches ? 3 : 2) * (l.fuentes.length - 1);
+  for (const l of estado.lugares) l.r = (anchoPantalla.matches ? 9 : 7.5) + (anchoPantalla.matches ? 3.2 : 2.4) * Math.sqrt(l.fuentes.length - 1);
   svg.selectAll('.lugar circle').attr('r', (l) => l.r);
   proyeccion = d3.geoOrthographic().translate([cx, cy]).clipAngle(90).precision(0.4);
   trazo = d3.geoPath(proyeccion, ctx);
@@ -395,7 +422,7 @@ function pintarLista() {
           $('.escena').scrollIntoView({ behavior: 'smooth', block: 'start' });
         },
       },
-        el('span', { class: 't' }, f.titulo),
+        el('span', { class: 't' }, rico(f.titulo)),
         el('span', { class: 'm' }, [nombresAutores(f.autores), f.anio, f.lugarObj.ciudad].filter(Boolean).join(' · ')),
       )))),
     )));

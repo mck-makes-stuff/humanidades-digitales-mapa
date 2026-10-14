@@ -1,14 +1,532 @@
 {
   "lugares": {
-    "barcelona": { "ciudad": "Barcelona", "pais": "España", "paisId": "724", "lat": 41.3874, "lon": 2.1686 },
-    "madrid": { "ciudad": "Madrid", "pais": "España", "paisId": "724", "lat": 40.4168, "lon": -3.7038 },
-    "sevilla": { "ciudad": "Sevilla", "pais": "España", "paisId": "724", "lat": 37.3891, "lon": -5.9845 },
-    "coruna": { "ciudad": "A Coruña", "pais": "España", "paisId": "724", "lat": 43.3623, "lon": -8.4115 },
-    "laguna": { "ciudad": "La Laguna (Tenerife)", "pais": "España", "paisId": "724", "lat": 28.4874, "lon": -16.3159 },
-    "cdmx": { "ciudad": "Ciudad de México", "pais": "México", "paisId": "484", "lat": 19.4326, "lon": -99.1332 },
-    "bogota": { "ciudad": "Bogotá", "pais": "Colombia", "paisId": "170", "lat": 4.711, "lon": -74.0721 },
-    "birmingham": { "ciudad": "Birmingham (Alabama)", "pais": "Estados Unidos", "paisId": "840", "lat": 33.5186, "lon": -86.8104 },
-    "buenosaires": { "ciudad": "Buenos Aires", "pais": "Argentina", "paisId": "032", "lat": -34.6037, "lon": -58.3816 }
+    "barcelona": {
+      "ciudad": "Barcelona",
+      "pais": "España",
+      "paisId": "724",
+      "lat": 41.3874,
+      "lon": 2.1686
+    },
+    "madrid": {
+      "ciudad": "Madrid",
+      "pais": "España",
+      "paisId": "724",
+      "lat": 40.4168,
+      "lon": -3.7038
+    },
+    "sevilla": {
+      "ciudad": "Sevilla",
+      "pais": "España",
+      "paisId": "724",
+      "lat": 37.3891,
+      "lon": -5.9845
+    },
+    "coruna": {
+      "ciudad": "A Coruña",
+      "pais": "España",
+      "paisId": "724",
+      "lat": 43.3623,
+      "lon": -8.4115
+    },
+    "laguna": {
+      "ciudad": "La Laguna (Tenerife)",
+      "pais": "España",
+      "paisId": "724",
+      "lat": 28.4874,
+      "lon": -16.3159
+    },
+    "cdmx": {
+      "ciudad": "Ciudad de México",
+      "pais": "México",
+      "paisId": "484",
+      "lat": 19.4326,
+      "lon": -99.1332
+    },
+    "bogota": {
+      "ciudad": "Bogotá",
+      "pais": "Colombia",
+      "paisId": "170",
+      "lat": 4.711,
+      "lon": -74.0721
+    },
+    "birmingham": {
+      "ciudad": "Birmingham (Alabama)",
+      "pais": "Estados Unidos",
+      "paisId": "840",
+      "lat": 33.5186,
+      "lon": -86.8104
+    },
+    "buenosaires": {
+      "ciudad": "Buenos Aires",
+      "pais": "Argentina",
+      "paisId": "032",
+      "lat": -34.6037,
+      "lon": -58.3816
+    },
+    "laspalmas": {
+      "ciudad": "Las Palmas de Gran Canaria",
+      "pais": "España",
+      "paisId": "724",
+      "lat": 28.1235,
+      "lon": -15.4363
+    },
+    "valencia": {
+      "ciudad": "Valencia",
+      "pais": "España",
+      "paisId": "724",
+      "lat": 39.4699,
+      "lon": -0.3763
+    },
+    "salamanca": {
+      "ciudad": "Salamanca",
+      "pais": "España",
+      "paisId": "724",
+      "lat": 40.9701,
+      "lon": -5.6635
+    },
+    "valladolid": {
+      "ciudad": "Valladolid",
+      "pais": "España",
+      "paisId": "724",
+      "lat": 41.6523,
+      "lon": -4.7245
+    },
+    "laplata": {
+      "ciudad": "La Plata",
+      "pais": "Argentina",
+      "paisId": "032",
+      "lat": -34.9205,
+      "lon": -57.9536
+    },
+    "rosario": {
+      "ciudad": "Rosario",
+      "pais": "Argentina",
+      "paisId": "032",
+      "lat": -32.9442,
+      "lon": -60.6505
+    },
+    "santarosa": {
+      "ciudad": "Santa Rosa (La Pampa)",
+      "pais": "Argentina",
+      "paisId": "032",
+      "lat": -36.6167,
+      "lon": -64.2833
+    },
+    "zamora": {
+      "ciudad": "Zamora (Michoacán)",
+      "pais": "México",
+      "paisId": "484",
+      "lat": 19.9855,
+      "lon": -102.2839
+    },
+    "monterrey": {
+      "ciudad": "Monterrey",
+      "pais": "México",
+      "paisId": "484",
+      "lat": 25.6866,
+      "lon": -100.3161
+    },
+    "morelia": {
+      "ciudad": "Morelia",
+      "pais": "México",
+      "paisId": "484",
+      "lat": 19.706,
+      "lon": -101.195
+    },
+    "tunja": {
+      "ciudad": "Tunja",
+      "pais": "Colombia",
+      "paisId": "170",
+      "lat": 5.5353,
+      "lon": -73.3678
+    },
+    "medellin": {
+      "ciudad": "Medellín",
+      "pais": "Colombia",
+      "paisId": "170",
+      "lat": 6.2442,
+      "lon": -75.5812
+    },
+    "valdivia": {
+      "ciudad": "Valdivia",
+      "pais": "Chile",
+      "paisId": "152",
+      "lat": -39.8142,
+      "lon": -73.2459
+    },
+    "talca": {
+      "ciudad": "Talca",
+      "pais": "Chile",
+      "paisId": "152",
+      "lat": -35.4264,
+      "lon": -71.6554
+    },
+    "santiago": {
+      "ciudad": "Santiago de Chile",
+      "pais": "Chile",
+      "paisId": "152",
+      "lat": -33.4489,
+      "lon": -70.6693
+    },
+    "lima": {
+      "ciudad": "Lima",
+      "pais": "Perú",
+      "paisId": "604",
+      "lat": -12.0464,
+      "lon": -77.0428
+    },
+    "sanjose": {
+      "ciudad": "San José",
+      "pais": "Costa Rica",
+      "paisId": "188",
+      "lat": 9.9281,
+      "lon": -84.0907
+    },
+    "panama": {
+      "ciudad": "Ciudad de Panamá",
+      "pais": "Panamá",
+      "paisId": "591",
+      "lat": 8.9824,
+      "lon": -79.5199
+    },
+    "loja": {
+      "ciudad": "Loja",
+      "pais": "Ecuador",
+      "paisId": "218",
+      "lat": -3.9931,
+      "lon": -79.2042
+    },
+    "caracas": {
+      "ciudad": "Caracas",
+      "pais": "Venezuela",
+      "paisId": "862",
+      "lat": 10.4806,
+      "lon": -66.9036
+    },
+    "montevideo": {
+      "ciudad": "Montevideo",
+      "pais": "Uruguay",
+      "paisId": "858",
+      "lat": -34.9011,
+      "lon": -56.1645
+    },
+    "lahabana": {
+      "ciudad": "La Habana",
+      "pais": "Cuba",
+      "paisId": "192",
+      "lat": 23.1136,
+      "lon": -82.3666
+    },
+    "rio": {
+      "ciudad": "Río de Janeiro",
+      "pais": "Brasil",
+      "paisId": "076",
+      "lat": -22.9068,
+      "lon": -43.1729
+    },
+    "florianopolis": {
+      "ciudad": "Florianópolis",
+      "pais": "Brasil",
+      "paisId": "076",
+      "lat": -27.5949,
+      "lon": -48.5482
+    },
+    "saopaulo": {
+      "ciudad": "São Paulo",
+      "pais": "Brasil",
+      "paisId": "076",
+      "lat": -23.5505,
+      "lon": -46.6333
+    },
+    "coimbra": {
+      "ciudad": "Coímbra",
+      "pais": "Portugal",
+      "paisId": "620",
+      "lat": 40.2033,
+      "lon": -8.4103
+    },
+    "braga": {
+      "ciudad": "Braga",
+      "pais": "Portugal",
+      "paisId": "620",
+      "lat": 41.5454,
+      "lon": -8.4265
+    },
+    "verona": {
+      "ciudad": "Verona",
+      "pais": "Italia",
+      "paisId": "380",
+      "lat": 45.4384,
+      "lon": 10.9916
+    },
+    "turin": {
+      "ciudad": "Turín",
+      "pais": "Italia",
+      "paisId": "380",
+      "lat": 45.0703,
+      "lon": 7.6869
+    },
+    "roma": {
+      "ciudad": "Roma",
+      "pais": "Italia",
+      "paisId": "380",
+      "lat": 41.9028,
+      "lon": 12.4964
+    },
+    "hamburgo": {
+      "ciudad": "Hamburgo",
+      "pais": "Alemania",
+      "paisId": "276",
+      "lat": 53.5511,
+      "lon": 9.9937
+    },
+    "londres": {
+      "ciudad": "Londres",
+      "pais": "Reino Unido",
+      "paisId": "826",
+      "lat": 51.5074,
+      "lon": -0.1278
+    }
+  },
+  "revistas": {
+    "Revista de Humanidades Digitales": {
+      "lugar": "madrid",
+      "explicacion": "La Revista de Humanidades Digitales se edita desde la Universidad Nacional de Educación a Distancia (UNED), en Madrid."
+    },
+    "Talía. Revista de estudios teatrales": {
+      "lugar": "madrid",
+      "explicacion": "Talía la publica la Universidad Complutense de Madrid."
+    },
+    "Revista Española de Documentación Científica": {
+      "lugar": "madrid",
+      "explicacion": "La revista la publica el Consejo Superior de Investigaciones Científicas (CSIC), en Madrid."
+    },
+    "Revista Iberoamericana de Educación": {
+      "lugar": "madrid",
+      "explicacion": "La Revista Iberoamericana de Educación la publica la Organización de Estados Iberoamericanos (OEI), cuya secretaría general está en Madrid."
+    },
+    "Mélanges de la Casa de Velázquez. Nouvelle série": {
+      "lugar": "madrid",
+      "explicacion": "La revista la publica la Casa de Velázquez, una institución francesa de investigación con sede en Madrid."
+    },
+    "Vegueta. Anuario de la Facultad de Geografía e Historia": {
+      "lugar": "laspalmas",
+      "explicacion": "Vegueta es el anuario de la Facultad de Geografía e Historia de la Universidad de Las Palmas de Gran Canaria."
+    },
+    "Artnodes": {
+      "lugar": "barcelona",
+      "explicacion": "Artnodes la publica la Universitat Oberta de Catalunya (UOC), en Barcelona."
+    },
+    "REIRE Revista d’Innovació i Recerca en Educació": {
+      "lugar": "barcelona",
+      "explicacion": "REIRE la publica la Universitat de Barcelona."
+    },
+    "Anuario Lope de Vega. Texto, literatura, cultura": {
+      "lugar": "barcelona",
+      "explicacion": "El Anuario Lope de Vega lo publica la Universitat Autònoma de Barcelona, con sede en Bellaterra, en el área de Barcelona."
+    },
+    "Anuario ThinkEPI": {
+      "lugar": "barcelona",
+      "explicacion": "El Anuario ThinkEPI lo publica Ediciones Profesionales de la Información, una editorial de Barcelona."
+    },
+    "Janus. Estudios sobre el Siglo de Oro": {
+      "lugar": "coruna",
+      "explicacion": "Janus la publica el SIELAE (Seminario Interdisciplinar para el Estudio de la Literatura Áurea Española), de la Universidade da Coruña."
+    },
+    "Janus: estudios sobre el Siglo de Oro": {
+      "lugar": "coruna",
+      "explicacion": "Janus la publica el SIELAE (Seminario Interdisciplinar para el Estudio de la Literatura Áurea Española), de la Universidade da Coruña."
+    },
+    "Philologia hispalensis": {
+      "lugar": "sevilla",
+      "explicacion": "Philologia Hispalensis la publica la Editorial Universidad de Sevilla."
+    },
+    "Revista de humanidades": {
+      "lugar": "sevilla",
+      "explicacion": "La Revista de Humanidades la publica el Centro Asociado de la UNED en Sevilla."
+    },
+    "Mètode Science Studies Journal": {
+      "lugar": "valencia",
+      "explicacion": "Mètode es la revista de divulgación de la investigación de la Universitat de València."
+    },
+    "Cuadernos salmantinos de filosofía": {
+      "lugar": "salamanca",
+      "explicacion": "La revista la publica la Universidad Pontificia de Salamanca."
+    },
+    "Castilla. Estudios de Literatura": {
+      "lugar": "valladolid",
+      "explicacion": "Castilla. Estudios de Literatura la publica la Universidad de Valladolid."
+    },
+    "Publicaciones de la Asociación Argentina de Humanidades Digitales": {
+      "lugar": "laplata",
+      "explicacion": "La revista de la Asociación Argentina de Humanidades Digitales se publica en La Plata, en el portal de revistas de la Universidad Nacional de La Plata."
+    },
+    "Palabra Clave (La Plata)": {
+      "lugar": "laplata",
+      "explicacion": "Palabra Clave la publica la Universidad Nacional de La Plata."
+    },
+    "Información, cultura y sociedad": {
+      "lugar": "buenosaires",
+      "explicacion": "La revista la publica la Facultad de Filosofía y Letras de la Universidad de Buenos Aires."
+    },
+    "Anuario de la Escuela de Historia": {
+      "lugar": "rosario",
+      "explicacion": "El anuario lo publica la Escuela de Historia de la Universidad Nacional de Rosario."
+    },
+    "Quinto Sol": {
+      "lugar": "santarosa",
+      "explicacion": "Quinto Sol la publica la Universidad Nacional de La Pampa, en Santa Rosa."
+    },
+    "Relaciones. Estudios de Historia y Sociedad": {
+      "lugar": "zamora",
+      "explicacion": "Relaciones la publica El Colegio de Michoacán, en Zamora."
+    },
+    "Humanitas. Revista de Teoría, Crítica y Estudios Literarios": {
+      "lugar": "monterrey",
+      "explicacion": "Humanitas la publica la Universidad Autónoma de Nuevo León, en el área de Monterrey."
+    },
+    "DICERE": {
+      "lugar": "morelia",
+      "explicacion": "Dicere la publica la Universidad Michoacana de San Nicolás de Hidalgo, en Morelia."
+    },
+    "Historia y Grafía": {
+      "lugar": "cdmx",
+      "explicacion": "Historia y Grafía la publica la Universidad Iberoamericana, en Ciudad de México."
+    },
+    "Figuras. Revista Académica de Investigación": {
+      "lugar": "cdmx",
+      "explicacion": "Figuras la publica la Facultad de Estudios Superiores Acatlán de la UNAM, en Naucalpan, dentro del área metropolitana de Ciudad de México."
+    },
+    "TIES, Revista de Tecnología e Innovación en Educación Superior": {
+      "lugar": "cdmx",
+      "explicacion": "TIES la publica la Universidad Nacional Autónoma de México (UNAM), en Ciudad de México."
+    },
+    "Bibliographica": {
+      "lugar": "cdmx",
+      "explicacion": "Bibliographica es la revista del Instituto de Investigaciones Bibliográficas de la Universidad Nacional Autónoma de México (UNAM), en Ciudad de México."
+    },
+    "Revista Digital Universitaria": {
+      "lugar": "cdmx",
+      "explicacion": "La Revista Digital Universitaria la publica la Universidad Nacional Autónoma de México (UNAM) en Ciudad de México."
+    },
+    "Hallazgos": {
+      "lugar": "bogota",
+      "explicacion": "Hallazgos la publica la Universidad Santo Tomás, en Bogotá."
+    },
+    "Nómadas": {
+      "lugar": "bogota",
+      "explicacion": "Nómadas la publica la Universidad Central, en Bogotá."
+    },
+    "Revista Colombiana de Educación": {
+      "lugar": "bogota",
+      "explicacion": "La revista la publica la Universidad Pedagógica Nacional de Colombia, en Bogotá."
+    },
+    "La Palabra": {
+      "lugar": "tunja",
+      "explicacion": "La Palabra la publica la Universidad Pedagógica y Tecnológica de Colombia, en Tunja."
+    },
+    "Perseitas": {
+      "lugar": "medellin",
+      "explicacion": "Perseitas la publica la Universidad Católica Luis Amigó, en Medellín."
+    },
+    "Estudios filológicos": {
+      "lugar": "valdivia",
+      "explicacion": "Estudios Filológicos la publica la Universidad Austral de Chile, en Valdivia."
+    },
+    "Universum": {
+      "lugar": "talca",
+      "explicacion": "Universum la publica la Universidad de Talca."
+    },
+    "Revista de Historia Social y de las Mentalidades": {
+      "lugar": "santiago",
+      "explicacion": "La revista la publica la Universidad de Santiago de Chile."
+    },
+    "Boletín de la Academia Peruana de la Lengua": {
+      "lugar": "lima",
+      "explicacion": "El boletín lo publica la Academia Peruana de la Lengua, en Lima."
+    },
+    "Revista del Instituto Riva-Agüero": {
+      "lugar": "lima",
+      "explicacion": "La revista la publica el Instituto Riva-Agüero de la Pontificia Universidad Católica del Perú, en Lima."
+    },
+    "Estudios": {
+      "lugar": "sanjose",
+      "explicacion": "Estudios la publica la Escuela de Estudios Generales de la Universidad de Costa Rica, en San José."
+    },
+    "Acción y Reflexión Educativa": {
+      "lugar": "panama",
+      "explicacion": "La revista la publica la Universidad de Panamá, en Ciudad de Panamá."
+    },
+    "Educación, Arte, Comunicación: Revista Académica e Investigativa": {
+      "lugar": "loja",
+      "explicacion": "La revista la publica la Universidad Nacional de Loja."
+    },
+    "Lógoi. Revista de Filosofía": {
+      "lugar": "caracas",
+      "explicacion": "Lógoi la publica la Universidad Católica Andrés Bello, en Caracas."
+    },
+    "InMediaciones de la Comunicación": {
+      "lugar": "montevideo",
+      "explicacion": "InMediaciones de la Comunicación la publica la Universidad ORT Uruguay, en Montevideo."
+    },
+    "Encuentros Uruguayos": {
+      "lugar": "montevideo",
+      "explicacion": "Encuentros Uruguayos la publica el Centro de Estudios Interdisciplinarios Uruguayos de la Universidad de la República, en Montevideo."
+    },
+    "Bibliotecas. Anales de Investigación": {
+      "lugar": "lahabana",
+      "explicacion": "La revista la publica la Biblioteca Nacional de Cuba José Martí, en La Habana."
+    },
+    "Liinc em Revista": {
+      "lugar": "rio",
+      "explicacion": "Liinc em Revista la publica el Instituto Brasileiro de Informação em Ciência e Tecnologia (IBICT), en Río de Janeiro."
+    },
+    "Texto Digital": {
+      "lugar": "florianopolis",
+      "explicacion": "Texto Digital la publica la Universidade Federal de Santa Catarina, en Florianópolis."
+    },
+    "Revista Latinoamericana de Ciencias de la Comunicación": {
+      "lugar": "saopaulo",
+      "explicacion": "La revista la publica la Asociación Latinoamericana de Investigadores de la Comunicación (ALAIC), con sede en São Paulo."
+    },
+    "MATLIT: Materialidades da Literatura": {
+      "lugar": "coimbra",
+      "explicacion": "MATLIT la publica la editorial de la Universidade de Coimbra."
+    },
+    "H2D|Revista de Humanidades Digitais": {
+      "lugar": "braga",
+      "explicacion": "H2D la publica la Universidade do Minho, en Braga."
+    },
+    "Historias Fingidas": {
+      "lugar": "verona",
+      "explicacion": "Historias Fingidas la publica la Università di Verona."
+    },
+    "Artifara": {
+      "lugar": "turin",
+      "explicacion": "Artifara la publica la Università degli Studi di Torino."
+    },
+    "Quaderni Culturali IILA": {
+      "lugar": "roma",
+      "explicacion": "Es la revista de la Organización Internacional Ítalo-Latinoamericana (IILA), con sede en Roma; la edita Firenze University Press."
+    },
+    "apropos [Perspektiven auf die Romania]": {
+      "lugar": "hamburgo",
+      "explicacion": "La revista la publica Hamburg University Press, la editorial de la biblioteca estatal y universitaria de Hamburgo."
+    },
+    "Digital Studies / Le champ numérique": {
+      "lugar": "londres",
+      "explicacion": "La revista la publica la Open Library of Humanities, con sede en Londres."
+    },
+    "Hispania": {
+      "lugar": "birmingham",
+      "explicacion": "Hispania es la revista de la American Association of Teachers of Spanish and Portuguese (AATSP), cuya oficina central está en Birmingham, Alabama."
+    }
+  },
+  "editoriales": {
+    "Gedisa Editorial": {
+      "lugar": "barcelona",
+      "explicacion": "Lo publicó Gedisa Editorial, que tiene su sede en Barcelona."
+    }
   },
   "fuentes": {
     "Z4WSZ3FZ": {
@@ -92,6 +610,11 @@
       "autores": "Galina Russell, Isabel",
       "publicacion": "Revista Digital Universitaria",
       "explicacion": "Apareció en la Revista Digital Universitaria, que publica la Universidad Nacional Autónoma de México (UNAM) en Ciudad de México."
+    },
+    "10.4000/jtei.4871": {
+      "lugar": "buenosaires",
+      "criterio": "autor",
+      "explicacion": "La revista la publica el TEI Consortium, un consorcio internacional sin una sede clara. Se ubicó según la primera autora, Gimena del Rio Riande, investigadora del CONICET en Buenos Aires."
     }
   }
 }

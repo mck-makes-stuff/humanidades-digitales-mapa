@@ -179,6 +179,8 @@ h1 {
   color: var(--acento);
 }
 .cita { margin: 0; font-size: 0.98rem; line-height: 1.5; overflow-wrap: anywhere; }
+.cita em i, .cita em em { font-style: normal; }
+.versalitas { font-variant: small-caps; }
 .porque { margin: 0; font-size: 0.84rem; color: var(--tinta-suave); }
 .porque strong { color: var(--tinta); }
 .enlace {
