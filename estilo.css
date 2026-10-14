@@ -1,14 +1,21 @@
-/* Mapa a la izquierda, ficha de la ciudad elegida a la derecha; en pantallas estrechas, una sola columna. */
+/* Globo a la izquierda, ficha de la ciudad elegida a la derecha; en pantallas estrechas, una sola columna. */
 :root {
-  --papel: #f7f8f6;
-  --tinta: #14233a;
-  --tinta-suave: #4d5b70;
-  --linea: #cfd8dc;
-  --mar: #cfdfe6;
-  --tierra: #f4f3ec;
-  --tierra-activa: #f1d37a;
-  --punto: #b81f4b;
-  --punto-oscuro: #7d1232;
+  color-scheme: dark;
+  --papel: #0b111c;
+  --tinta: #e8edf3;
+  --tinta-suave: #98a6ba;
+  --linea: #25324a;
+  --superficie: #131c2c;
+  --mar: #0f2136;
+  --reticula: rgba(140, 170, 205, 0.13);
+  --tierra: #2a3a52;
+  --frontera: #101a2a;
+  --tierra-activa: #d6a23c;
+  --tierra-activa-borde: #f3cd7a;
+  --borde-globo: #3d5374;
+  --halo: rgba(86, 140, 205, 0.28);
+  --punto: #e8386a;
+  --punto-oscuro: #ff5c88;
   --blanco: #ffffff;
   --titulos: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
   --citas: "Source Serif 4", Georgia, "Times New Roman", serif;
@@ -39,7 +46,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--punto);
+  color: var(--tierra-activa);
 }
 
 h1 {
@@ -74,25 +81,20 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .vistas button {
   padding: 6px 13px;
-  border: 1.5px solid var(--tinta);
+  border: 1.5px solid var(--borde-globo);
   border-radius: 999px;
   background: transparent;
   font-size: 0.88rem;
   font-weight: 600;
 }
-.vistas button:hover { background: var(--blanco); }
-.vistas button.activa { background: var(--tinta); color: var(--papel); }
+.vistas button:hover { border-color: var(--tinta); }
+.vistas button.activa { background: var(--tinta); border-color: var(--tinta); color: var(--papel); }
 
-:focus-visible { outline: 3px solid var(--punto); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--tierra-activa-borde); outline-offset: 2px; }
 
-.mapa {
-  position: relative;
-  border: 1.5px solid var(--tinta);
-  background: var(--mar);
-  overflow: hidden;
-  min-height: 360px;
-}
-.mapa svg { display: block; width: 100%; touch-action: none; cursor: grab; }
+.mapa { position: relative; min-height: 340px; }
+.mapa canvas { display: block; }
+.mapa svg { position: absolute; inset: 0; width: 100%; touch-action: none; cursor: grab; }
 .mapa svg:active { cursor: grabbing; }
 
 .cargando { position: absolute; inset: 0; margin: 0; display: grid; place-items: center; color: var(--tinta-suave); }
@@ -100,15 +102,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .zoom { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; }
 .zoom button {
   width: 36px; height: 36px;
-  border: 1.5px solid var(--tinta);
-  background: var(--blanco);
+  border: 1.5px solid var(--borde-globo);
+  background: var(--superficie);
   font-size: 1.25rem; font-weight: 600; line-height: 1;
 }
 .zoom button + button { border-top: 0; }
-.zoom button:hover { background: var(--tierra-activa); }
-
-.pais { fill: var(--tierra); stroke: #b9c4c9; stroke-width: 0.5; vector-effect: non-scaling-stroke; }
-.pais.con-fuentes { fill: var(--tierra-activa); stroke: #a5852a; }
+.zoom button:hover { border-color: var(--tinta); }
+.zoom button:hover + button { border-top: 1.5px solid var(--tinta); margin-top: -1.5px; }
 
 .lugar { cursor: pointer; }
 .lugar circle {
@@ -119,8 +119,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .lugar:hover circle, .lugar:focus-visible circle { fill: var(--punto-oscuro); }
 .lugar:focus-visible { outline: none; }
-.lugar:focus-visible circle { stroke: var(--tinta); stroke-width: 3; }
-.lugar.elegido circle { fill: var(--tinta); stroke: var(--tierra-activa); stroke-width: 3; }
+.lugar:focus-visible circle { stroke: var(--tierra-activa-borde); stroke-width: 4; }
+.lugar.elegido circle { fill: var(--blanco); stroke: var(--punto); stroke-width: 4; }
+.lugar.elegido .numero { fill: var(--papel); }
 .lugar .numero {
   fill: var(--blanco);
   font-size: 12px; font-weight: 800;
@@ -131,7 +132,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   fill: var(--tinta);
   font-size: 13px; font-weight: 600;
   paint-order: stroke;
-  stroke: var(--blanco); stroke-width: 3.5; stroke-linejoin: round;
+  stroke: var(--papel); stroke-width: 4; stroke-linejoin: round;
   dominant-baseline: central;
   pointer-events: none;
 }
@@ -143,13 +144,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .clave { display: flex; align-items: baseline; gap: 7px; }
 .muestra { flex: none; width: 12px; height: 12px; }
-.muestra-pais { background: var(--tierra-activa); border: 1px solid #a5852a; }
+.muestra-pais { background: var(--tierra-activa); }
 .muestra-punto { background: var(--punto); border-radius: 50%; }
 
 /* Panel */
 .panel {
   min-width: 0;
-  border-top: 5px solid var(--tinta);
+  border-top: 5px solid var(--tierra-activa);
   padding-top: 14px;
   display: flex; flex-direction: column; gap: 14px;
 }
@@ -170,13 +171,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
   border: 0; background: none; text-align: left;
   font-weight: 600;
 }
-.paises button:hover .barra span { background: var(--punto-oscuro); }
+.paises button:hover .barra span { background: var(--tierra-activa-borde); }
 .barra { height: 12px; background: var(--linea); }
-.barra span { display: block; height: 100%; background: var(--punto); }
+.barra span { display: block; height: 100%; background: var(--tierra-activa); }
 .paises .cuenta { text-align: right; font-variant-numeric: tabular-nums; }
 
 .ficha {
-  background: var(--blanco);
+  background: var(--superficie);
   border: 1px solid var(--linea);
   padding: 16px;
   display: flex; flex-direction: column; gap: 10px;
@@ -201,7 +202,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   background: var(--punto); color: var(--blanco);
   font-size: 0.9rem; font-weight: 600; text-decoration: none;
 }
-.enlace:hover { background: var(--punto-oscuro); }
+.enlace:hover { background: var(--punto-oscuro); color: var(--papel); }
 .sin-enlace { margin: 0; font-size: 0.85rem; color: var(--tinta-suave); font-style: italic; }
 
 /* Listado */
@@ -211,7 +212,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .grupo h3 {
   margin: 14px 0 4px;
   padding-bottom: 6px;
-  border-bottom: 2px solid var(--tinta);
+  border-bottom: 2px solid var(--borde-globo);
   font-size: 1rem; font-weight: 800;
   display: flex; justify-content: space-between;
 }

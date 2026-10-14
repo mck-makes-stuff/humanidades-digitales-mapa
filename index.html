@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mapa de las humanidades digitales en español</title>
-  <meta name="description" content="Un mapa interactivo que muestra dónde se publican las fuentes sobre humanidades digitales en español.">
+  <meta name="description" content="Un globo interactivo que muestra dónde se publicó una selección de fuentes sobre humanidades digitales en español.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
@@ -12,31 +12,31 @@
 </head>
 <body>
   <header class="cabecera">
-    <p class="antetitulo">Humanidades digitales · Bibliografía en el mapa</p>
+    <p class="antetitulo">Humanidades digitales · Una selección de lecturas</p>
     <h1>¿De dónde vienen las humanidades digitales en español?</h1>
     <p class="entrada">
-      Cada círculo marca la ciudad donde se publicó una fuente de esta bibliografía.
-      Haz clic en un círculo para leer la cita y abrir la fuente.
+      Un puñado de lecturas para empezar a explorar el campo, cada una situada en la ciudad
+      donde se publicó. Gira el globo y haz clic en un círculo para leer la cita y abrir la fuente.
     </p>
   </header>
 
   <main class="principal">
-    <section class="mapa-zona" aria-label="Mapa de las fuentes">
-      <div class="vistas" role="group" aria-label="Vistas del mapa">
-        <button type="button" data-vista="todas" class="activa">Todas las fuentes</button>
+    <section class="mapa-zona" aria-label="Globo de las fuentes">
+      <div class="vistas" role="group" aria-label="Vistas del globo">
+        <button type="button" data-vista="inicio" class="activa">Vista inicial</button>
         <button type="button" data-vista="espana">España</button>
         <button type="button" data-vista="america">América</button>
-        <button type="button" data-vista="mundo">Mundo entero</button>
       </div>
       <div class="mapa" id="mapa">
-        <p class="cargando" id="cargando">Cargando el mapa…</p>
+        <p class="cargando" id="cargando">Cargando el globo…</p>
         <div class="zoom" role="group" aria-label="Acercar y alejar">
           <button type="button" id="acercar" aria-label="Acercar">+</button>
           <button type="button" id="alejar" aria-label="Alejar">−</button>
         </div>
       </div>
       <p class="leyenda">
-        <span class="clave"><span class="muestra muestra-pais"></span> País con fuentes</span>
+        <span class="clave">Arrastra para girar el globo.</span>
+        <span class="clave"><span class="muestra muestra-pais"></span> País con fuentes en esta selección</span>
         <span class="clave"><span class="muestra muestra-punto"></span> Ciudad de publicación (el número indica cuántas fuentes)</span>
       </p>
     </section>
@@ -45,14 +45,15 @@
   </main>
 
   <section class="listado" aria-labelledby="titulo-listado">
-    <h2 id="titulo-listado">Todas las fuentes</h2>
+    <h2 id="titulo-listado">Las fuentes de esta selección</h2>
     <div id="lista"></div>
   </section>
 
   <footer class="pie">
-    <h2>Cómo se ubicó cada fuente</h2>
+    <h2>Sobre esta selección</h2>
     <p>
-      Las fuentes vienen de una biblioteca de Zotero exportada como archivo CSV. Cada una se colocó
+      Estas lecturas son un punto de partida: salen de una bibliografía personal guardada en Zotero
+      y dan una primera idea de un campo mucho más amplio. Cada una se colocó
       en la ciudad donde tiene su sede la organización que la publicó: la editorial, la universidad
       o la asociación responsable de la revista. Cuando ese dato no existe, se usó el lugar de origen
       del autor. Las fuentes repetidas en el archivo aparecen una sola vez.

@@ -1,11 +1,11 @@
-// Lee fuentes.csv (exportado de Zotero) y ubicaciones.json, y dibuja el mapa.
+// Lee fuentes.csv (exportado de Zotero) y ubicaciones.json, y dibuja el globo.
 
 const ATLAS = 'https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json';
 const TIPOS = { book: 'Libro', journalArticle: 'Artículo', bookSection: 'Capítulo de libro', webpage: 'Página web', thesis: 'Tesis' };
 const CRITERIOS = { editorial: 'Ubicada según quién la publicó.', autor: 'Ubicada según el origen del autor.' };
 
-const estado = { lugares: [], fuentes: [], elegido: null, mundo: null, vista: 'todas' };
-let svg, capa, zoom, proyeccion, ancho, alto;
+const estado = { lugares: [], fuentes: [], elegido: null, vista: 'inicio', centro: [-50, 16], k: 1 };
+let lienzo, ctx, svg, proyeccion, trazo, ancho, alto, radio, tierra, fronteras, activos, animacion;
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -117,134 +117,191 @@ function construirCita(f) {
 
 const plural = (n) => (n === 1 ? '1 fuente' : n + ' fuentes');
 
-/* ---------- Mapa ---------- */
+/* ---------- Globo ---------- */
 
-function dibujarMapa() {
+const VISTAS = {
+  inicio: { centro: [-50, 16], k: 1 },
+  espana: (ls) => ls.filter((l) => l.pais === 'España'),
+  america: (ls) => ls.filter((l) => l.lon < -30),
+};
+const K_MIN = 1, K_MAX = 10;
+const limitar = (v, a, b) => Math.max(a, Math.min(b, v));
+const color = (nombre) => getComputedStyle(document.documentElement).getPropertyValue(nombre).trim();
+
+function prepararGlobo(mundo) {
+  const paises = topojson.feature(mundo, mundo.objects.countries).features;
+  const conFuentes = new Set(estado.lugares.map((l) => l.paisId));
+  tierra = topojson.merge(mundo, mundo.objects.countries.geometries);
+  fronteras = topojson.mesh(mundo, mundo.objects.countries, (a, b) => a !== b);
+  activos = { type: 'FeatureCollection', features: paises.filter((p) => conFuentes.has(p.id)) };
+
   const caja = $('#mapa');
-  ancho = caja.clientWidth;
-  alto = Math.round(Math.max(360, Math.min(ancho * 0.66, 620)));
-  caja.querySelector('svg')?.remove();
-
-  svg = d3.select(caja).insert('svg', ':first-child')
-    .attr('viewBox', `0 0 ${ancho} ${alto}`)
-    .attr('height', alto)
+  lienzo = caja.insertBefore(el('canvas', { 'aria-hidden': 'true' }), caja.firstChild);
+  ctx = lienzo.getContext('2d');
+  svg = d3.select(caja).insert('svg', '.zoom')
     .attr('role', 'group')
-    .attr('aria-label', 'Mapa del mundo con las ciudades de publicación');
-  capa = svg.append('g');
+    .attr('aria-label', 'Globo terráqueo con las ciudades de publicación');
 
-  proyeccion = d3.geoNaturalEarth1().fitExtent([[4, 4], [ancho - 4, alto - 4]], { type: 'Sphere' });
-  const trazo = d3.geoPath(proyeccion);
-
-  const porPais = d3.rollup(estado.lugares, (v) => d3.sum(v, (l) => l.fuentes.length), (l) => l.paisId);
-  const nombrePais = new Map(estado.lugares.map((l) => [l.paisId, l.pais]));
-  const paises = topojson.feature(estado.mundo, estado.mundo.objects.countries).features
-    .filter((p) => p.id !== '010'); // sin la Antártida
-
-  capa.append('g').selectAll('path').data(paises).join('path')
-    .attr('class', (p) => 'pais' + (porPais.has(p.id) ? ' con-fuentes' : ''))
-    .attr('d', trazo)
-    .filter((p) => porPais.has(p.id))
-    .append('title').text((p) => `${nombrePais.get(p.id)}: ${plural(porPais.get(p.id))}`);
-
-  for (const l of estado.lugares) {
-    [l.x, l.y] = proyeccion([l.lon, l.lat]);
-    l.r = 10 + 3 * (l.fuentes.length - 1);
-  }
-
-  const marcas = capa.append('g').selectAll('g').data(estado.lugares).join('g')
+  const marcas = svg.selectAll('g').data(estado.lugares).join('g')
     .attr('class', 'lugar')
     .attr('tabindex', 0)
     .attr('role', 'button')
     .attr('aria-label', (l) => `${l.ciudad}, ${l.pais}: ${plural(l.fuentes.length)}`)
     .on('click', (ev, l) => elegir(l))
     .on('keydown', (ev, l) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); elegir(l); } });
+  for (const l of estado.lugares) l.r = 10 + 3 * (l.fuentes.length - 1);
   marcas.append('circle').attr('r', (l) => l.r);
   marcas.append('text').attr('class', 'numero').text((l) => l.fuentes.length);
   marcas.append('text').attr('class', 'nombre').text((l) => l.ciudad);
 
-  zoom = d3.zoom()
-    .scaleExtent([1, 40])
-    .translateExtent([[0, 0], [ancho, alto]])
-    .on('zoom', (ev) => {
-      capa.attr('transform', ev.transform);
-      colocarMarcas(ev.transform);
-      if (ev.sourceEvent) marcarVista(null);
-    });
-  svg.call(zoom);
-  irAVista(estado.vista, false);
-  marcarElegido();
+  // Arrastrar gira el globo; la rueda o dos dedos lo acercan.
+  let pellizco = null;
+  svg.call(d3.drag()
+    .on('start', () => { animacion?.stop(); })
+    .on('drag', (ev) => {
+      if (ev.sourceEvent.touches?.length > 1) return;
+      const grados = 180 / Math.PI / (radio * estado.k);
+      estado.centro = [estado.centro[0] - ev.dx * grados, limitar(estado.centro[1] + ev.dy * grados, -80, 80)];
+      marcarVista(null);
+      pintar();
+    }));
+  svg.on('wheel', (ev) => {
+    ev.preventDefault();
+    animacion?.stop();
+    estado.k = limitar(estado.k * Math.exp(-ev.deltaY * 0.0015), K_MIN, K_MAX);
+    marcarVista(null);
+    pintar();
+  }, { passive: false });
+  const separacion = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  svg.on('touchstart.pellizco', (ev) => { if (ev.touches.length === 2) pellizco = { d: separacion(ev.touches), k: estado.k }; });
+  svg.on('touchmove.pellizco', (ev) => {
+    if (ev.touches.length !== 2 || !pellizco) return;
+    estado.k = limitar(pellizco.k * separacion(ev.touches) / pellizco.d, K_MIN, K_MAX);
+    marcarVista(null);
+    pintar();
+  });
+  svg.on('touchend.pellizco', () => { pellizco = null; });
+
+  medir();
 }
 
-// Mantiene los círculos del mismo tamaño al acercar y oculta los nombres que se pisan.
-function colocarMarcas(t) {
-  const marcas = capa.selectAll('.lugar');
-  marcas.attr('transform', (l) => `translate(${l.x},${l.y}) scale(${1 / t.k})`);
+function medir() {
+  const caja = $('#mapa');
+  ancho = caja.clientWidth;
+  alto = Math.round(limitar(ancho * 0.86, 340, 640));
+  radio = Math.min(ancho, alto) / 2 - 14;
+  const dpr = window.devicePixelRatio || 1;
+  lienzo.width = ancho * dpr; lienzo.height = alto * dpr;
+  lienzo.style.width = ancho + 'px'; lienzo.style.height = alto + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  svg.attr('viewBox', `0 0 ${ancho} ${alto}`).attr('height', alto);
+  proyeccion = d3.geoOrthographic().translate([ancho / 2, alto / 2]).clipAngle(90).precision(0.4);
+  trazo = d3.geoPath(proyeccion, ctx);
+  pintar();
+}
 
-  const ocupado = estado.lugares.map((l) => {
-    const [x, y] = t.apply([l.x, l.y]);
-    return [x - l.r - 2, y - l.r - 2, x + l.r + 2, y + l.r + 2];
-  });
+function pintar() {
+  proyeccion.rotate([-estado.centro[0], -estado.centro[1]]).scale(radio * estado.k);
+  const cx = ancho / 2, cy = alto / 2, R = radio * estado.k;
+
+  ctx.clearRect(0, 0, ancho, alto);
+  const halo = ctx.createRadialGradient(cx, cy, R * 0.96, cx, cy, R * 1.09);
+  halo.addColorStop(0, color('--halo'));
+  halo.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(cx, cy, R * 1.09, 0, 2 * Math.PI); ctx.fill();
+
+  const dibujar = (geo, relleno, linea, grosor = 0.6) => {
+    ctx.beginPath(); trazo(geo);
+    if (relleno) { ctx.fillStyle = relleno; ctx.fill(); }
+    if (linea) { ctx.strokeStyle = linea; ctx.lineWidth = grosor; ctx.stroke(); }
+  };
+  dibujar({ type: 'Sphere' }, color('--mar'));
+  dibujar(d3.geoGraticule10(), null, color('--reticula'), 0.5);
+  dibujar(tierra, color('--tierra'));
+  dibujar(fronteras, null, color('--frontera'));
+  dibujar(activos, color('--tierra-activa'), color('--tierra-activa-borde'), 0.8);
+  dibujar({ type: 'Sphere' }, null, color('--borde-globo'), 1);
+
+  colocarMarcas();
+}
+
+// Sitúa los círculos, esconde los que quedan al otro lado del globo y los nombres que se pisan.
+function colocarMarcas() {
+  for (const l of estado.lugares) {
+    l.visible = d3.geoDistance([l.lon, l.lat], estado.centro) < Math.PI / 2 - 0.05;
+    [l.sx, l.sy] = proyeccion([l.lon, l.lat]);
+  }
+  const visibles = estado.lugares.filter((l) => l.visible);
+  const ocupado = visibles.map((l) => [l.sx - l.r - 2, l.sy - l.r - 2, l.sx + l.r + 2, l.sy + l.r + 2]);
   const choca = (a) => ocupado.some((b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1]);
-  const orden = [...estado.lugares].sort((a, b) => (b === estado.elegido) - (a === estado.elegido) || b.fuentes.length - a.fuentes.length);
+  const orden = [...visibles].sort((a, b) => (b === estado.elegido) - (a === estado.elegido) || b.fuentes.length - a.fuentes.length);
   const lado = new Map();
   for (const l of orden) {
-    const [x, y] = t.apply([l.x, l.y]);
     const w = l.ciudad.length * 7.4 + 6;
-    const derecha = [x + l.r + 4, y - 9, x + l.r + 4 + w, y + 9];
-    const izquierda = [x - l.r - 4 - w, y - 9, x - l.r - 4, y + 9];
+    const derecha = [l.sx + l.r + 4, l.sy - 9, l.sx + l.r + 4 + w, l.sy + 9];
+    const izquierda = [l.sx - l.r - 4 - w, l.sy - 9, l.sx - l.r - 4, l.sy + 9];
     if (!choca(derecha) && derecha[2] < ancho) { lado.set(l, 1); ocupado.push(derecha); }
     else if (!choca(izquierda) && izquierda[0] > 0) { lado.set(l, -1); ocupado.push(izquierda); }
     else lado.set(l, 0);
   }
+  const marcas = svg.selectAll('.lugar')
+    .attr('display', (l) => (l.visible ? null : 'none'))
+    .attr('transform', (l) => `translate(${l.sx},${l.sy})`)
+    .classed('elegido', (l) => l === estado.elegido);
   marcas.select('.nombre')
     .attr('display', (l) => (lado.get(l) ? null : 'none'))
     .attr('text-anchor', (l) => (lado.get(l) === -1 ? 'end' : 'start'))
-    .attr('x', (l) => lado.get(l) * (l.r + 6));
+    .attr('x', (l) => (lado.get(l) || 0) * (l.r + 6));
 }
 
-function encuadrar(lugares, animar = true) {
-  let t = d3.zoomIdentity;
-  if (lugares) {
-    const margen = Math.min(90, ancho * 0.14);
-    const xs = d3.extent(lugares, (l) => l.x), ys = d3.extent(lugares, (l) => l.y);
-    const k = Math.max(1, Math.min(12, (ancho - 2 * margen) / (xs[1] - xs[0] || 1), (alto - 2 * margen) / (ys[1] - ys[0] || 1)));
-    t = d3.zoomIdentity.translate(ancho / 2, alto / 2).scale(k).translate(-(xs[0] + xs[1]) / 2, -(ys[0] + ys[1]) / 2);
-  }
-  const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  (animar && !sinMovimiento ? svg.transition().duration(650) : svg).call(zoom.transform, t);
-}
-
-function irAVista(vista, animar = true) {
-  const filtros = {
-    todas: () => true,
-    espana: (l) => l.pais === 'España',
-    america: (l) => l.lon < -30,
+function volarA(centro, k) {
+  animacion?.stop();
+  const desde = { centro: estado.centro, k: estado.k };
+  const dLon = ((centro[0] - desde.centro[0] + 540) % 360) - 180;
+  const paso = (t) => {
+    estado.centro = [desde.centro[0] + dLon * t, desde.centro[1] + (centro[1] - desde.centro[1]) * t];
+    estado.k = desde.k + (k - desde.k) * t;
+    pintar();
   };
-  encuadrar(vista && filtros[vista] ? estado.lugares.filter(filtros[vista]) : null, animar);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { paso(1); return; }
+  animacion = d3.timer((ms) => {
+    const t = Math.min(1, ms / 900);
+    paso(d3.easeCubicInOut(t));
+    if (t === 1) animacion.stop();
+  });
+}
+
+// Gira el globo hasta un grupo de lugares y se acerca lo justo para que quepan.
+function encuadrar(lugares) {
+  const centro = d3.geoCentroid({ type: 'MultiPoint', coordinates: lugares.map((l) => [l.lon, l.lat]) });
+  const lejos = d3.max(lugares, (l) => d3.geoDistance([l.lon, l.lat], centro));
+  volarA([centro[0], limitar(centro[1], -80, 80)], lejos > 0.01 ? limitar(0.7 / Math.sin(Math.min(lejos, 1.5)), K_MIN, 6) : 2.5);
+}
+
+function irAVista(vista) {
+  const v = VISTAS[vista];
+  if (typeof v === 'function') encuadrar(v(estado.lugares)); else volarA(v.centro, v.k);
   marcarVista(vista);
 }
 
 function marcarVista(vista) {
+  if (estado.vista === vista) return;
   estado.vista = vista;
   document.querySelectorAll('.vistas button').forEach((b) => b.classList.toggle('activa', b.dataset.vista === vista));
-}
-
-function marcarElegido() {
-  capa.selectAll('.lugar').classed('elegido', (l) => l === estado.elegido)
-    .filter((l) => l === estado.elegido).raise();
-  colocarMarcas(d3.zoomTransform(svg.node()));
 }
 
 /* ---------- Panel y listado ---------- */
 
 function elegir(lugar, { centrar = false } = {}) {
   estado.elegido = lugar;
-  marcarElegido();
+  svg.selectAll('.lugar').filter((l) => l === lugar).raise();
   if (centrar && lugar) {
-    const vecinos = estado.lugares.filter((l) => Math.hypot(l.x - lugar.x, l.y - lugar.y) < ancho * 0.05);
-    encuadrar(vecinos.length > 1 ? vecinos : estado.lugares.filter((l) => l.pais === lugar.pais));
+    // Se acerca hasta separar la ciudad de su vecina más próxima.
+    const vecina = d3.min(estado.lugares.filter((l) => l !== lugar), (l) => d3.geoDistance([l.lon, l.lat], [lugar.lon, lugar.lat]));
+    volarA([lugar.lon, lugar.lat], limitar(70 / (vecina * radio), 1.6, 7));
     marcarVista(null);
-  }
+  } else colocarMarcas();
   pintarPanel();
   if (lugar && matchMedia('(max-width: 900px)').matches) {
     $('#panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -257,19 +314,18 @@ function pintarPanel() {
   const lugar = estado.elegido;
 
   if (!lugar) {
-    const total = estado.fuentes.length;
     const paises = d3.rollups(estado.lugares, (v) => d3.sum(v, (l) => l.fuentes.length), (l) => l.pais)
       .sort((a, b) => b[1] - a[1]);
     const max = paises[0][1];
     panel.append(
-      el('h2', {}, `${plural(total)} de ${paises.length} países`),
-      el('p', { class: 'sub' }, 'Elige un círculo del mapa para ver sus fuentes. También puedes acercarte a un país:'),
+      el('h2', {}, 'Una muestra del campo'),
+      el('p', { class: 'sub' }, `${estado.fuentes.length} fuentes escogidas, publicadas en ${paises.length} países. Elige un círculo del globo para leerlas, o acércate a un país:`),
       el('ul', { class: 'paises' }, ...paises.map(([pais, n]) => {
         const relleno = el('span');
         relleno.style.width = (n / max) * 100 + '%';
         return el('li', {}, el('button', {
           type: 'button',
-          'aria-label': `${pais}: ${plural(n)}. Acercar el mapa.`,
+          'aria-label': `${pais}: ${plural(n)}. Girar el globo hasta allí.`,
           onclick: () => { encuadrar(estado.lugares.filter((l) => l.pais === pais)); marcarVista(null); },
         }, el('span', {}, pais), el('span', { class: 'barra' }, relleno), el('span', { class: 'cuenta' }, String(n))));
       })),
@@ -280,7 +336,7 @@ function pintarPanel() {
   panel.append(
     el('button', { type: 'button', class: 'volver', onclick: () => elegir(null) }, '← Ver el resumen por país'),
     el('h2', {}, lugar.ciudad),
-    el('p', { class: 'sub' }, `${lugar.pais} · ${plural(lugar.fuentes.length)}`),
+    el('p', { class: 'sub' }, `${lugar.pais} · ${plural(lugar.fuentes.length)} en esta selección`),
     ...lugar.fuentes.map((f) => {
       const porque = el('p', { class: 'porque' }, el('strong', {}, '¿Por qué aquí? '), f.explicacion + ' ' + (CRITERIOS[f.criterio] || ''));
       const enlace = f.url
@@ -319,7 +375,6 @@ async function iniciar() {
       fetch(ATLAS).then((r) => r.json()),
     ]);
     const { fuentes, excluidas } = prepararFuentes(leerCSV(csv), ubicaciones);
-    estado.mundo = mundo;
     estado.fuentes = fuentes;
     estado.lugares = Object.entries(ubicaciones.lugares)
       .map(([id, l]) => ({ id, ...l, fuentes: fuentes.filter((f) => f.lugar === id) }))
@@ -330,26 +385,25 @@ async function iniciar() {
       const nota = $('#excluidas');
       nota.hidden = false;
       nota.textContent = excluidas === 1
-        ? 'Una fuente del archivo no aparece en el mapa porque no se pudo determinar su origen.'
-        : `${excluidas} fuentes del archivo no aparecen en el mapa porque no se pudo determinar su origen.`;
+        ? 'Una fuente del archivo no aparece en el globo porque no se pudo determinar su origen.'
+        : `${excluidas} fuentes del archivo no aparecen en el globo porque no se pudo determinar su origen.`;
     }
 
     $('#cargando').remove();
-    dibujarMapa();
+    prepararGlobo(mundo);
     pintarPanel();
     pintarLista();
 
     document.querySelectorAll('.vistas button').forEach((b) => b.addEventListener('click', () => irAVista(b.dataset.vista)));
-    $('#acercar').addEventListener('click', () => { svg.transition().duration(250).call(zoom.scaleBy, 1.8); marcarVista(null); });
-    $('#alejar').addEventListener('click', () => { svg.transition().duration(250).call(zoom.scaleBy, 1 / 1.8); marcarVista(null); });
+    const acercar = (factor) => { volarA(estado.centro, limitar(estado.k * factor, K_MIN, K_MAX)); marcarVista(null); };
+    $('#acercar').addEventListener('click', () => acercar(1.7));
+    $('#alejar').addEventListener('click', () => acercar(1 / 1.7));
 
-    let anchoPrevio = ancho;
-    new ResizeObserver(() => {
-      if ($('#mapa').clientWidth !== anchoPrevio) { dibujarMapa(); anchoPrevio = ancho; }
-    }).observe($('#mapa'));
+    new ResizeObserver(() => { if ($('#mapa').clientWidth !== ancho) medir(); }).observe($('#mapa'));
+    document.fonts?.ready.then(pintar);
   } catch (error) {
     console.error(error);
-    $('#cargando').textContent = 'No se pudo cargar el mapa. Revisa tu conexión y vuelve a cargar la página.';
+    $('#cargando').textContent = 'No se pudo cargar el globo. Revisa tu conexión y vuelve a cargar la página.';
   }
 }
 
