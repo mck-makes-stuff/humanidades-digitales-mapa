@@ -129,7 +129,7 @@ function construirCita(f) {
     p.append([f.editorial, f.anio].filter(Boolean).join(', ') + '.');
   } else {
     // Comillas inglesas; las que ya trae el título pasan a ser simples.
-    const interior = f.titulo.replace(/[“«]/g, '‘').replace(/[”»]/g, '’').replace(/"([^"]*)"/g, '‘$1’');
+    const interior = f.titulo.replace(/[“«]/g, '‘').replace(/[”»]/g, '’').replace(/(?<!=)"([^"<>]*)"/g, '‘$1’');
     p.append('“', rico(interior), '”. ');
     if (f.publicacion) p.append(el('em', {}, f.publicacion));
     const resto = [
