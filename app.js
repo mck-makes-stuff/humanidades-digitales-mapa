@@ -128,7 +128,9 @@ function construirCita(f) {
     p.append(el('em', {}, rico(f.titulo)), '. ');
     p.append([f.editorial, f.anio].filter(Boolean).join(', ') + '.');
   } else {
-    p.append('«', rico(f.titulo), '». ');
+    // Comillas inglesas; las que ya trae el título pasan a ser simples.
+    const interior = f.titulo.replace(/[“«]/g, '‘').replace(/[”»]/g, '’').replace(/"([^"]*)"/g, '‘$1’');
+    p.append('“', rico(interior), '”. ');
     if (f.publicacion) p.append(el('em', {}, f.publicacion));
     const resto = [
       f.volumen && 'vol. ' + f.volumen,
