@@ -1,0 +1,97 @@
+{
+  "lugares": {
+    "barcelona": { "ciudad": "Barcelona", "pais": "España", "paisId": "724", "lat": 41.3874, "lon": 2.1686 },
+    "madrid": { "ciudad": "Madrid", "pais": "España", "paisId": "724", "lat": 40.4168, "lon": -3.7038 },
+    "sevilla": { "ciudad": "Sevilla", "pais": "España", "paisId": "724", "lat": 37.3891, "lon": -5.9845 },
+    "coruna": { "ciudad": "A Coruña", "pais": "España", "paisId": "724", "lat": 43.3623, "lon": -8.4115 },
+    "laguna": { "ciudad": "La Laguna (Tenerife)", "pais": "España", "paisId": "724", "lat": 28.4874, "lon": -16.3159 },
+    "cdmx": { "ciudad": "Ciudad de México", "pais": "México", "paisId": "484", "lat": 19.4326, "lon": -99.1332 },
+    "bogota": { "ciudad": "Bogotá", "pais": "Colombia", "paisId": "170", "lat": 4.711, "lon": -74.0721 },
+    "birmingham": { "ciudad": "Birmingham (Alabama)", "pais": "Estados Unidos", "paisId": "840", "lat": 33.5186, "lon": -86.8104 },
+    "buenosaires": { "ciudad": "Buenos Aires", "pais": "Argentina", "paisId": "032", "lat": -34.6037, "lon": -58.3816 }
+  },
+  "fuentes": {
+    "Z4WSZ3FZ": {
+      "lugar": "barcelona",
+      "criterio": "editorial",
+      "explicacion": "Lo publicó Gedisa Editorial, que tiene su sede en Barcelona."
+    },
+    "LC7MVTLR": {
+      "lugar": "madrid",
+      "criterio": "editorial",
+      "autores": "García Serrano, Ana; Menta Garuz, Antonio",
+      "explicacion": "La Revista de Humanidades Digitales se edita desde la Universidad Nacional de Educación a Distancia (UNED), en Madrid."
+    },
+    "LDLLRZEP": {
+      "lugar": "cdmx",
+      "criterio": "editorial",
+      "titulo": "Biblioteca de Humanidades Digitales: conceptos, reflexiones y horizontes",
+      "publicacion": "Bibliographica",
+      "explicacion": "Bibliographica es la revista del Instituto de Investigaciones Bibliográficas de la Universidad Nacional Autónoma de México (UNAM), en Ciudad de México."
+    },
+    "CSLA8RQJ": {
+      "lugar": "buenosaires",
+      "criterio": "autor",
+      "tipo": "journalArticle",
+      "autores": "Borges, Jorge Luis",
+      "titulo": "La biblioteca de Babel",
+      "publicacion": "El jardín de senderos que se bifurcan",
+      "anio": "1941",
+      "explicacion": "El registro de Zotero no indica quién lo publicó. El documento es el cuento de Jorge Luis Borges, que nació en Buenos Aires y publicó allí el cuento por primera vez (Editorial Sur, 1941)."
+    },
+    "6CWTNYSU": {
+      "lugar": "birmingham",
+      "criterio": "editorial",
+      "autores": "Fernández Quintanilla, Sylvia; Álvarez, Maira E.",
+      "explicacion": "Hispania es la revista de la American Association of Teachers of Spanish and Portuguese (AATSP), cuya oficina central está en Birmingham, Alabama."
+    },
+    "SZ4JDGNP": {
+      "lugar": "madrid",
+      "criterio": "editorial",
+      "explicacion": "La revista la publica la Casa de Velázquez, una institución francesa de investigación con sede en Madrid."
+    },
+    "Y3E52ZWE": {
+      "lugar": "laguna",
+      "criterio": "editorial",
+      "publicacion": "Ciencias Sociales y Humanidades Digitales: técnicas, herramientas y experiencias de e-Research e investigación en colaboración",
+      "url": "https://digibug.ugr.es/handle/10481/48882",
+      "explicacion": "Es un capítulo del libro n.º 61 de los Cuadernos Artesanos de Comunicación, que publica la Sociedad Latina de Comunicación Social en La Laguna, Tenerife. El autor trabaja en la Universidad de Granada."
+    },
+    "QBXAQYT5": {
+      "lugar": "sevilla",
+      "criterio": "editorial",
+      "autores": "Hernández Lorenzo, Laura",
+      "explicacion": "La Revista de Humanidades la publica el Centro Asociado de la UNED en Sevilla."
+    },
+    "IQ89GURU": {
+      "lugar": "madrid",
+      "criterio": "editorial",
+      "autores": "Lázaro Pulido, Manuel; De-Juanas Oliva, Ángel",
+      "explicacion": "La Revista Iberoamericana de Educación la publica la Organización de Estados Iberoamericanos (OEI), cuya secretaría general está en Madrid."
+    },
+    "35WKVUSB": {
+      "lugar": "bogota",
+      "criterio": "editorial",
+      "publicacion": "Revista Colombiana de Educación",
+      "explicacion": "La revista la publica la Universidad Pedagógica Nacional de Colombia, en Bogotá."
+    },
+    "2WQDW2LY": {
+      "lugar": "barcelona",
+      "criterio": "editorial",
+      "explicacion": "El Anuario ThinkEPI lo publica Ediciones Profesionales de la Información, una editorial de Barcelona."
+    },
+    "UMW6MFA7": {
+      "lugar": "coruna",
+      "criterio": "editorial",
+      "autores": "Rojas Castro, Antonio",
+      "explicacion": "Janus la publica el SIELAE (Seminario Interdisciplinar para el Estudio de la Literatura Áurea Española), de la Universidade da Coruña."
+    },
+    "SW5LAZYL": {
+      "lugar": "cdmx",
+      "criterio": "editorial",
+      "autores": "Galina Russell, Isabel",
+      "publicacion": "Revista Digital Universitaria",
+      "explicacion": "Apareció en la Revista Digital Universitaria, que publica la Universidad Nacional Autónoma de México (UNAM) en Ciudad de México."
+    }
+  }
+}
