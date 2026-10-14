@@ -5,7 +5,7 @@ const TIPOS = { book: 'Libro', journalArticle: 'Artículo', bookSection: 'Capít
 const CRITERIOS = { editorial: 'Ubicada según quién la publicó.', autor: 'Ubicada según el origen del autor.' };
 
 const estado = { lugares: [], fuentes: [], elegido: null, vista: 'inicio', centro: [-50, 16], k: 1 };
-let lienzo, ctx, svg, proyeccion, trazo, ancho, alto, radio, tierra, fronteras, activos, animacion;
+let lienzo, ctx, svg, proyeccion, trazo, ancho, alto, radio, cx, cy, tierra, fronteras, activos, animacion, vaiven, C;
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -126,7 +126,22 @@ const VISTAS = {
 };
 const K_MIN = 1, K_MAX = 10;
 const limitar = (v, a, b) => Math.max(a, Math.min(b, v));
-const color = (nombre) => getComputedStyle(document.documentElement).getPropertyValue(nombre).trim();
+const anchoPantalla = matchMedia('(min-width: 901px)');
+const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)');
+
+// Estrellas de fondo: posiciones fijas, generadas una sola vez.
+const ESTRELLAS = d3.range(170).map((i) => {
+  const azar = (n) => { const x = Math.sin(i * 127.1 + n * 311.7) * 43758.5453; return x - Math.floor(x); };
+  return [azar(1), azar(2), 0.4 + azar(3) * 0.9, 0.15 + azar(4) * 0.5];
+});
+
+function leerColores() {
+  const estilo = getComputedStyle(document.documentElement);
+  const nombres = ['mar', 'mar-claro', 'reticula', 'tierra', 'frontera', 'tierra-activa', 'tierra-activa-borde', 'borde-globo', 'halo', 'estrella'];
+  C = Object.fromEntries(nombres.map((n) => [n, estilo.getPropertyValue('--' + n).trim()]));
+}
+
+function detenerVaiven() { vaiven?.stop(); vaiven = null; }
 
 function prepararGlobo(mundo) {
   const paises = topojson.feature(mundo, mundo.objects.countries).features;
@@ -135,10 +150,11 @@ function prepararGlobo(mundo) {
   fronteras = topojson.mesh(mundo, mundo.objects.countries, (a, b) => a !== b);
   activos = { type: 'FeatureCollection', features: paises.filter((p) => conFuentes.has(p.id)) };
 
+  leerColores();
   const caja = $('#mapa');
-  lienzo = caja.insertBefore(el('canvas', { 'aria-hidden': 'true' }), caja.firstChild);
+  lienzo = caja.appendChild(el('canvas', { 'aria-hidden': 'true' }));
   ctx = lienzo.getContext('2d');
-  svg = d3.select(caja).insert('svg', '.zoom')
+  svg = d3.select(caja).append('svg')
     .attr('role', 'group')
     .attr('aria-label', 'Globo terráqueo con las ciudades de publicación');
 
@@ -149,15 +165,14 @@ function prepararGlobo(mundo) {
     .attr('aria-label', (l) => `${l.ciudad}, ${l.pais}: ${plural(l.fuentes.length)}`)
     .on('click', (ev, l) => elegir(l))
     .on('keydown', (ev, l) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); elegir(l); } });
-  for (const l of estado.lugares) l.r = 10 + 3 * (l.fuentes.length - 1);
-  marcas.append('circle').attr('r', (l) => l.r);
+  marcas.append('circle');
   marcas.append('text').attr('class', 'numero').text((l) => l.fuentes.length);
   marcas.append('text').attr('class', 'nombre').text((l) => l.ciudad);
 
   // Arrastrar gira el globo; la rueda o dos dedos lo acercan.
   let pellizco = null;
   svg.call(d3.drag()
-    .on('start', () => { animacion?.stop(); })
+    .on('start', () => { animacion?.stop(); detenerVaiven(); })
     .on('drag', (ev) => {
       if (ev.sourceEvent.touches?.length > 1) return;
       const grados = 180 / Math.PI / (radio * estado.k);
@@ -167,13 +182,13 @@ function prepararGlobo(mundo) {
     }));
   svg.on('wheel', (ev) => {
     ev.preventDefault();
-    animacion?.stop();
+    animacion?.stop(); detenerVaiven();
     estado.k = limitar(estado.k * Math.exp(-ev.deltaY * 0.0015), K_MIN, K_MAX);
     marcarVista(null);
     pintar();
   }, { passive: false });
   const separacion = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
-  svg.on('touchstart.pellizco', (ev) => { if (ev.touches.length === 2) pellizco = { d: separacion(ev.touches), k: estado.k }; });
+  svg.on('touchstart.pellizco', (ev) => { detenerVaiven(); if (ev.touches.length === 2) pellizco = { d: separacion(ev.touches), k: estado.k }; });
   svg.on('touchmove.pellizco', (ev) => {
     if (ev.touches.length !== 2 || !pellizco) return;
     estado.k = limitar(pellizco.k * separacion(ev.touches) / pellizco.d, K_MIN, K_MAX);
@@ -188,40 +203,61 @@ function prepararGlobo(mundo) {
 function medir() {
   const caja = $('#mapa');
   ancho = caja.clientWidth;
-  alto = Math.round(limitar(ancho * 0.86, 340, 640));
-  radio = Math.min(ancho, alto) / 2 - 14;
+  alto = caja.clientHeight;
+  // En pantallas anchas la ficha flota a la derecha, así que el globo se centra en el espacio libre.
+  const libre = anchoPantalla.matches ? ancho - 420 : ancho;
+  radio = Math.min(libre, alto) / 2 * (anchoPantalla.matches ? 0.86 : 0.9);
+  cx = libre / 2 + (anchoPantalla.matches ? 24 : 0);
+  cy = alto / 2 + (anchoPantalla.matches ? 14 : 0);
   const dpr = window.devicePixelRatio || 1;
   lienzo.width = ancho * dpr; lienzo.height = alto * dpr;
-  lienzo.style.width = ancho + 'px'; lienzo.style.height = alto + 'px';
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  svg.attr('viewBox', `0 0 ${ancho} ${alto}`).attr('height', alto);
-  proyeccion = d3.geoOrthographic().translate([ancho / 2, alto / 2]).clipAngle(90).precision(0.4);
+  svg.attr('viewBox', `0 0 ${ancho} ${alto}`);
+  for (const l of estado.lugares) l.r = (anchoPantalla.matches ? 10 : 8) + (anchoPantalla.matches ? 3 : 2) * (l.fuentes.length - 1);
+  svg.selectAll('.lugar circle').attr('r', (l) => l.r);
+  proyeccion = d3.geoOrthographic().translate([cx, cy]).clipAngle(90).precision(0.4);
   trazo = d3.geoPath(proyeccion, ctx);
   pintar();
 }
 
 function pintar() {
   proyeccion.rotate([-estado.centro[0], -estado.centro[1]]).scale(radio * estado.k);
-  const cx = ancho / 2, cy = alto / 2, R = radio * estado.k;
-
-  ctx.clearRect(0, 0, ancho, alto);
-  const halo = ctx.createRadialGradient(cx, cy, R * 0.96, cx, cy, R * 1.09);
-  halo.addColorStop(0, color('--halo'));
-  halo.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = halo;
-  ctx.beginPath(); ctx.arc(cx, cy, R * 1.09, 0, 2 * Math.PI); ctx.fill();
-
+  const R = radio * estado.k;
+  const esfera = { type: 'Sphere' };
+  const degradado = (x0, y0, r0, r1, ...paradas) => {
+    const g = ctx.createRadialGradient(x0, y0, r0, cx, cy, r1);
+    paradas.forEach(([p, c]) => g.addColorStop(p, c));
+    return g;
+  };
   const dibujar = (geo, relleno, linea, grosor = 0.6) => {
     ctx.beginPath(); trazo(geo);
     if (relleno) { ctx.fillStyle = relleno; ctx.fill(); }
     if (linea) { ctx.strokeStyle = linea; ctx.lineWidth = grosor; ctx.stroke(); }
   };
-  dibujar({ type: 'Sphere' }, color('--mar'));
-  dibujar(d3.geoGraticule10(), null, color('--reticula'), 0.5);
-  dibujar(tierra, color('--tierra'));
-  dibujar(fronteras, null, color('--frontera'));
-  dibujar(activos, color('--tierra-activa'), color('--tierra-activa-borde'), 0.8);
-  dibujar({ type: 'Sphere' }, null, color('--borde-globo'), 1);
+
+  ctx.clearRect(0, 0, ancho, alto);
+  ctx.fillStyle = C.estrella;
+  for (const [x, y, r, a] of ESTRELLAS) {
+    ctx.globalAlpha = a;
+    ctx.beginPath(); ctx.arc(x * ancho, y * alto, r, 0, 2 * Math.PI); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // Atmósfera
+  ctx.fillStyle = degradado(cx, cy, R * 0.92, R * 1.25, [0, C.halo], [1, 'rgba(0,0,0,0)']);
+  ctx.beginPath(); ctx.arc(cx, cy, R * 1.25, 0, 2 * Math.PI); ctx.fill();
+
+  // Océano iluminado desde arriba a la izquierda
+  dibujar(esfera, degradado(cx - R * 0.35, cy - R * 0.4, R * 0.05, R, [0, C['mar-claro']], [1, C.mar]));
+  dibujar(d3.geoGraticule10(), null, C.reticula, 0.5);
+  dibujar(tierra, C.tierra);
+  dibujar(fronteras, null, C.frontera);
+  dibujar(activos, C['tierra-activa'], C['tierra-activa-borde'], 0.8);
+
+  // Brillo y sombra para dar volumen a la esfera
+  dibujar(esfera, degradado(cx - R * 0.32, cy - R * 0.38, R * 0.1, R * 1.02,
+    [0, 'rgba(255,255,255,0.13)'], [0.5, 'rgba(255,255,255,0)'], [0.78, 'rgba(0,10,12,0.25)'], [1, 'rgba(0,8,10,0.78)']));
+  dibujar(esfera, null, C['borde-globo'], 1.2);
 
   colocarMarcas();
 }
@@ -256,7 +292,7 @@ function colocarMarcas() {
 }
 
 function volarA(centro, k) {
-  animacion?.stop();
+  animacion?.stop(); detenerVaiven();
   const desde = { centro: estado.centro, k: estado.k };
   const dLon = ((centro[0] - desde.centro[0] + 540) % 360) - 180;
   const paso = (t) => {
@@ -264,7 +300,7 @@ function volarA(centro, k) {
     estado.k = desde.k + (k - desde.k) * t;
     pintar();
   };
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { paso(1); return; }
+  if (sinMovimiento.matches) { paso(1); return; }
   animacion = d3.timer((ms) => {
     const t = Math.min(1, ms / 900);
     paso(d3.easeCubicInOut(t));
@@ -303,7 +339,7 @@ function elegir(lugar, { centrar = false } = {}) {
     marcarVista(null);
   } else colocarMarcas();
   pintarPanel();
-  if (lugar && matchMedia('(max-width: 900px)').matches) {
+  if (lugar && !anchoPantalla.matches) {
     $('#panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
@@ -356,7 +392,7 @@ function pintarLista() {
         type: 'button',
         onclick: () => {
           elegir(f.lugarObj, { centrar: true });
-          $('.principal').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          $('.escena').scrollIntoView({ behavior: 'smooth', block: 'start' });
         },
       },
         el('span', { class: 't' }, f.titulo),
@@ -399,8 +435,18 @@ async function iniciar() {
     $('#acercar').addEventListener('click', () => acercar(1.7));
     $('#alejar').addEventListener('click', () => acercar(1 / 1.7));
 
-    new ResizeObserver(() => { if ($('#mapa').clientWidth !== ancho) medir(); }).observe($('#mapa'));
+    new ResizeObserver(() => {
+      if ($('#mapa').clientWidth !== ancho || $('#mapa').clientHeight !== alto) medir();
+    }).observe($('#mapa'));
     document.fonts?.ready.then(pintar);
+
+    // Un balanceo suave deja ver que es una esfera; se detiene en cuanto alguien la toca.
+    if (!sinMovimiento.matches) {
+      vaiven = d3.timer((ms) => {
+        estado.centro = [VISTAS.inicio.centro[0] + 12 * Math.sin(ms / 4500), estado.centro[1]];
+        pintar();
+      });
+    }
   } catch (error) {
     console.error(error);
     $('#cargando').textContent = 'No se pudo cargar el globo. Revisa tu conexión y vuelve a cargar la página.';

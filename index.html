@@ -5,41 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mapa de las humanidades digitales en español</title>
   <meta name="description" content="Un globo interactivo que muestra dónde se publicó una selección de fuentes sobre humanidades digitales en español.">
+  <meta name="theme-color" content="#030d10">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Sora:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
-  <header class="cabecera">
-    <p class="antetitulo">Humanidades digitales · Una selección de lecturas</p>
-    <h1>¿De dónde vienen las humanidades digitales en español?</h1>
-    <p class="entrada">
-      Un puñado de lecturas para empezar a explorar el campo, cada una situada en la ciudad
-      donde se publicó. Gira el globo y haz clic en un círculo para leer la cita y abrir la fuente.
-    </p>
-  </header>
+  <main class="escena">
+    <header class="cabecera">
+      <p class="antetitulo">Humanidades digitales · Una selección de lecturas</p>
+      <h1>¿De dónde vienen las humanidades digitales en español?</h1>
+      <p class="entrada">
+        Un puñado de lecturas para empezar a explorar el campo, cada una en la ciudad donde se publicó.
+        Gira el globo y haz clic en un círculo.
+      </p>
+    </header>
 
-  <main class="principal">
-    <section class="mapa-zona" aria-label="Globo de las fuentes">
-      <div class="vistas" role="group" aria-label="Vistas del globo">
-        <button type="button" data-vista="inicio" class="activa">Vista inicial</button>
-        <button type="button" data-vista="espana">España</button>
-        <button type="button" data-vista="america">América</button>
-      </div>
-      <div class="mapa" id="mapa">
-        <p class="cargando" id="cargando">Cargando el globo…</p>
+    <section class="mapa" id="mapa" aria-label="Globo de las fuentes">
+      <p class="cargando" id="cargando">Cargando el globo…</p>
+    </section>
+
+    <div class="controles">
+      <div class="botones">
+        <div class="vistas" role="group" aria-label="Vistas del globo">
+          <button type="button" data-vista="inicio" class="activa">Vista inicial</button>
+          <button type="button" data-vista="espana">España</button>
+          <button type="button" data-vista="america">América</button>
+        </div>
         <div class="zoom" role="group" aria-label="Acercar y alejar">
-          <button type="button" id="acercar" aria-label="Acercar">+</button>
           <button type="button" id="alejar" aria-label="Alejar">−</button>
+          <button type="button" id="acercar" aria-label="Acercar">+</button>
         </div>
       </div>
       <p class="leyenda">
-        <span class="clave">Arrastra para girar el globo.</span>
+        <span class="clave">Arrastra para girar</span>
         <span class="clave"><span class="muestra muestra-pais"></span> País con fuentes en esta selección</span>
-        <span class="clave"><span class="muestra muestra-punto"></span> Ciudad de publicación (el número indica cuántas fuentes)</span>
+        <span class="clave"><span class="muestra muestra-punto"></span> Ciudad y número de fuentes</span>
       </p>
-    </section>
+    </div>
 
     <aside class="panel" id="panel" aria-live="polite"></aside>
   </main>
